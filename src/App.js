@@ -1,10 +1,25 @@
 import Header from "./Header";
 import "./App.css";
-function App() {
-  let subscribers = [
-    { id: 1, name: "Abhishek", phone: "9999999999" },
-    { id: 2, name: "Ganesh", phone: "80989898989" },
-  ];
+import React, { Component } from "react";
+
+
+class App extends Component{
+
+  constructor() 
+  {
+    super()
+    this.state={
+      subscribersListToShow: []
+    }
+  }
+
+  render() {
+
+  // let subscribers = [
+  //   { id: 1, name: "Abhishek", phone: "9999999999" },
+  //   { id: 2, name: "Ganesh", phone: "80989898989" },
+  // ];
+
   return (
     <div>
       <Header heading = "Phone Directory" />
@@ -17,13 +32,14 @@ function App() {
         </div>
 
         
-        {subscribers.map((sub) => {
+        {
+          this.state.subscribersListToShow.map((sub) => {
           return (
             <div key={sub.id} className="grid-container">
               <span className="grid-item">{sub.name}</span>
               <span className="grid-item">{sub.phone}</span>
               <span className="grid-item action-btn-container">
-                <button className="custom-btn delete-btn">Delete</button>
+                <button className="custom-btn delete-btn" >Delete</button>
               </span>
             </div>
           );
@@ -32,5 +48,5 @@ function App() {
     </div>
   );
 }
-
+}
 export default App;
