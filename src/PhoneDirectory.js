@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { Fragment, useCallback, useEffect,useMemo } from "react";
 import AddSubscriber from "./AddSubscriber";
 import ShowSubscribers from "./ShowSubscribers";
 import { BrowserRouter as Router, Route } from "react-router-dom";
@@ -6,35 +6,63 @@ import { useState } from "react";
 import Footer from "./Footer"
 import { SubscriberCountContext } from "./SubscriberCountContext";
 export default function PhoneDirectory() {
-  const [subscribersList, setSubscribersList] = useState([
-    {
-      id: 1,
-      name: "Abhishek",
-      phone: "9999999999",
-    },
-    {
-      id: 2,
-      name: "Ganesh",
-      phone: "8888888888",
-    },
-  ]);
+  const [subscribersList, setSubscribersList] = useState([]);
 
-  function deleteSubscriberHandler(subscriberId) {
-    const newSubscribers = subscribersList.filter(
-      (subscriber) => subscriber.id !== subscriberId
-    );
+  async function loadData(){
+    const rawResponse = await fetch("http://localhost:7081/api/contacts")
+    const data = await rawResponse.json()
+    setSubscribersList(data);
+ }
+  useEffect(()=>{
+      loadData();
+  }, [])
 
-    setSubscribersList(newSubscribers);
-  }
+// const deleteSubscriberHandler= useCallback((subscriberId)=>{
+//     fetch("http://localhost:7081/api/contacts/"+ subscriberId,{method: 'DELETE'})
+// .then(input=>input.json())
+//  .then(data=>{
+//      loadData()
+//  })
+// },[])
 
-  function addSubscriberHandler(newSubscriber) {
-    if (subscribersList.length > 0) {
-      newSubscriber.id = subscribersList[subscribersList.length - 1].id + 1;
-    } else {
-      newSubscriber.id = 1;
-    }
-    subscribersList.push(newSubscriber);
-    setSubscribersList(subscribersList);
+const deleteSubscriberHandler= useCallback(async (subscriberId)=>{
+    const rawResponse = await  fetch("http://localhost:7081/api/contacts/"+ subscriberId,{method: 'DELETE'})
+     await rawResponse.json();
+    loadData();
+
+},[])
+//   function deleteSubscriberHandler(subscriberId) {
+
+// fetch("http://localhost:7081/api/contacts/"+ subscriberId,{method: 'DELETE'})
+// .then(input=>input.json())
+// .then(data=>{
+//     loadData()
+// })
+//   }
+const numberOfSubscriptions = useMemo(() => {return subscribersList.length}, [subscribersList])
+
+  async function addSubscriberHandler(newSubscriber) {
+
+const rawResponse = await fetch("http://localhost:7081/api/contacts/", {
+                                method: "POST",
+                                headers: {
+                               'content-type':'application/json'
+                                },
+                                body:JSON.stringify(newSubscriber)
+                                }
+                                );
+   
+     await rawResponse.json();
+    
+    await loadData();
+
+    // if (subscribersList.length > 0) {
+    //   newSubscriber.id = subscribersList[subscribersList.length - 1].id + 1;
+    // } else {
+    //   newSubscriber.id = 1;
+    // }
+    // subscribersList.push(newSubscriber);
+    // setSubscribersList(subscribersList);
     //  this.setState({ subscribersList: subscribersList });
   }
 
@@ -70,7 +98,7 @@ export default function PhoneDirectory() {
           />
         </div>
       </Router>
-      <SubscriberCountContext.Provider value={subscribersList.length}>
+      <SubscriberCountContext.Provider value={numberOfSubscriptions}>
       <Footer ></Footer>
       </SubscriberCountContext.Provider>
       
