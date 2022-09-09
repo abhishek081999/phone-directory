@@ -1,16 +1,21 @@
-import React, { Fragment, useCallback, useEffect,useMemo } from "react";
+import React, { Fragment, useCallback, useEffect,useReducer} from "react";
 import AddSubscriber from "./AddSubscriber";
 import ShowSubscribers from "./ShowSubscribers";
 import { BrowserRouter as Router, Route } from "react-router-dom";
 import { useState } from "react";
 import Footer from "./Footer"
 import { SubscriberCountContext } from "./SubscriberCountContext";
+import { TotalSubscribersReducer } from "./TotalSubscribersReducer";
 export default function PhoneDirectory() {
   const [subscribersList, setSubscribersList] = useState([]);
 
+  const [state, dispatch] = useReducer(TotalSubscribersReducer,{count:0})
   async function loadData(){
     const rawResponse = await fetch("http://localhost:7081/api/contacts")
     const data = await rawResponse.json()
+
+    dispatch({"type": "UPDATE_COUNT", payload: data.length})
+    
     setSubscribersList(data);
  }
   useEffect(()=>{
@@ -39,7 +44,8 @@ const deleteSubscriberHandler= useCallback(async (subscriberId)=>{
 //     loadData()
 // })
 //   }
-const numberOfSubscriptions = useMemo(() => {return subscribersList.length}, [subscribersList])
+
+// const numberOfSubscriptions = useMemo(() => {return subscribersList.length}, [subscribersList])
 
   async function addSubscriberHandler(newSubscriber) {
 
@@ -98,7 +104,7 @@ const rawResponse = await fetch("http://localhost:7081/api/contacts/", {
           />
         </div>
       </Router>
-      <SubscriberCountContext.Provider value={numberOfSubscriptions}>
+      <SubscriberCountContext.Provider value={state.count}>
       <Footer ></Footer>
       </SubscriberCountContext.Provider>
       
